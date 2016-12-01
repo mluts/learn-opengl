@@ -1,4 +1,4 @@
-GCC = 'gcc -lGLEW -lglfw -lX11 -lpthread -lXrandr -lXi'
+GCC = 'gcc -lGL -lGLEW -lglfw -lX11 -lpthread -lXrandr -lXi'
 
 file 'main' => 'main.c' do |t|
   sh "#{GCC} -o #{t.name} #{t.prerequisites.join(' ')}"
