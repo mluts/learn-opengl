@@ -1,6 +1,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <stdio.h>
+#include <cstdio>
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
+{
+  if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+  {
+    glfwSetWindowShouldClose(window, GL_TRUE);
+  }
+}
 
 int main()
 {
@@ -11,9 +19,9 @@ int main()
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-  GLFWwindow *window = glfwCreateWindow(800, 600, "Learn OpenGL", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(800, 600, "Learn OpenGL", nullptr, nullptr);
 
-  if(window == NULL)
+  if(window == nullptr)
   {
     printf("Failed to create GLFW window\n");
     glfwTerminate();
@@ -33,10 +41,15 @@ int main()
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
+  glfwSetKeyCallback(window, key_callback);
 
   while(!glfwWindowShouldClose(window))
   {
     glfwPollEvents();
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     glfwSwapBuffers(window);
   }
 
