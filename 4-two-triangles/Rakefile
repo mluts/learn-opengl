@@ -1,0 +1,11 @@
+require 'rake/clean'
+
+CLEAN << 'main'
+
+GCC = 'gcc -std=c++11 -Wall -g -lstdc++ -lGL -lGLEW -lglfw -lX11 -lpthread -lXrandr -lXi'
+
+file 'main' => 'main.cpp' do |t|
+  sh "#{GCC} -o #{t.name} #{t.prerequisites.join(' ')}"
+end
+
+task default: :main
