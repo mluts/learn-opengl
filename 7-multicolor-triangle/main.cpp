@@ -8,10 +8,12 @@
 static const char *vertexShaderSource =
 "#version 330 core\n"
 "layout (location = 0) in vec4 position;\n"
-"layout (location = 1) in vec3 color\n"
-"out vec3 inColor\n"
-"void main()\n"
-"{ gl_Position = vec4(position.x, position.y, position.z, 1.0); }\n"
+"layout (location = 1) in vec3 color;\n"
+"out vec3 inColor;\n"
+"void main(){\n"
+"  gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+"  inColor = color;\n"
+"}\n"
 ;
 
 static const char *fragmentShaderSource =
