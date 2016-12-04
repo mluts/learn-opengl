@@ -4,18 +4,25 @@
 #include <string>
 #include <iostream>
 
-static const char *vertexShaderSource =
+static const GLchar *vertexShaderSource =
 "#version 330 core\n"
 "layout (location = 0) in vec4 position;\n"
 "void main()\n"
 "{ gl_Position = vec4(position.x, position.y, position.z, 1.0); }\n"
 ;
 
-static const char *fragmentShaderSource =
+static const GLchar *fragmentShaderColor1Source =
 "#version 330 core\n"
 "out vec4 color;\n"
 "void main()\n"
 "{ color = vec4(1.0f, 0.5f, 0.2f, 1.0f); }\n"
+;
+
+static const GLchar *fragmentShaderColor2Source =
+"#version 330 core\n"
+"out vec4 color;\n"
+"void main()\n"
+"{ color = vec4(1.0f, 1.0f, 0.2f, 1.0f); }\n"
 ;
 
 static const GLfloat triangle1[] = {
@@ -38,7 +45,11 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
   }
 }
 
-bool createShaderProgram(GLuint *shaderProgram) {
+bool createShaderProgram(
+    const GLchar *vertexShaderSource,
+    const GLchar *fragmentShaderSource,
+    GLuint *shaderProgram
+) {
 GLuint vertexShader, fragmentShader;
 GLint success;
 GLchar infoLog[512];
@@ -168,11 +179,17 @@ int main()
   glfwSetKeyCallback(window, key_callback);
 
   bool success;
-  GLuint VAOtriangle1, VAOtriangle2, shaderProgram;
+  GLuint VAOtriangle1, VAOtriangle2, shaderProgram1, shaderProgram2;
 
-  success = createShaderProgram(&shaderProgram);
+  success = createShaderProgram(vertexShaderSource, fragmentShaderColor1Source, &shaderProgram1);
   if(!success) {
-    std::cout << "Failed to create shader program\n" << std::endl;
+    std::cout << "Failed to create shader program 1\n" << std::endl;
+    return 1;
+  }
+
+  success = createShaderProgram(vertexShaderSource, fragmentShaderColor2Source, &shaderProgram2);
+  if(!success) {
+    std::cout << "Failed to create shader program 2\n" << std::endl;
     return 1;
   }
 
@@ -189,14 +206,16 @@ int main()
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shaderProgram);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Draw triangles as line
 
+    glUseProgram(shaderProgram1);
     glBindVertexArray(VAOtriangle1);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
+    glUseProgram(shaderProgram2);
     glBindVertexArray(VAOtriangle2);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
     glBindVertexArray(0);
 
     glfwSwapBuffers(window);
