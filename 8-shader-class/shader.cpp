@@ -2,9 +2,12 @@
 
 Shader::Shader(const GLchar *vertexPath, const GLchar *fragmentPath)
 {
-  readVertex(vertexPath);
-  readFragment(fragmentPath);
-  createProgram();
+  createProgram(vertexPath, fragmentPath);
+}
+
+void Shader::use()
+{
+  glUseProgram(program);
 }
 
 void Shader::readVertex(const GLchar *path)
@@ -77,10 +80,13 @@ GLchar log[512];
   }
 }
 
-void Shader::createProgram()
+void Shader::createProgram(const GLchar *vertexPath, const GLchar *fragmentPath)
 {
 GLint success;
 GLchar log[512];
+
+  readVertex(vertexPath);
+  readFragment(fragmentPath);
 
   program = glCreateProgram();
   glAttachShader(program, vertexShader);
@@ -96,4 +102,7 @@ GLchar log[512];
                << std::endl;
     return;
   }
+
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
 }

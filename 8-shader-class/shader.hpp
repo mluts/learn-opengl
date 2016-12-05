@@ -18,11 +18,12 @@ public:
     );
 
     void use();
+
 private:
     GLuint vertexShader, fragmentShader;
     void readVertex(const GLchar *path);
     void readFragment(const GLchar *path);
-    void createProgram();
+    void createProgram(const GLchar *vertexPath, const GLchar *fragmentPath);
     void checkShaderCompilationStatus(GLuint shader);
 };
 
