@@ -5,12 +5,16 @@ in vec2 TexCoord;
 
 out vec4 color;
 
-uniform sampler2D theTexture;
+uniform sampler2D theTexture1;
+uniform sampler2D theTexture2;
 
 void main()
 {
-  //color = vec4(1.0f, 0.2f, 0.5f, 1.0f);
-  color = texture(theTexture, TexCoord) * vec4(inColor, 1.0f);
+  color = mix(
+    texture(theTexture1, TexCoord),
+    texture(theTexture2, TexCoord),
+    0.5
+  );
 }
 
 // vi: syntax=c

@@ -60,6 +60,30 @@ GLuint VBO, EBO;
   glBindVertexArray(0);
 }
 
+void loadTexture(const char *path, GLenum texname, GLuint *texture)
+{
+  int width = 0, height = 0;
+
+  glActiveTexture(texname);
+
+  unsigned char *image = SOIL_load_image(
+      path, &width, &height,
+      0, SOIL_LOAD_RGB
+      );
+
+  glGenTextures(1, texture);
+  glBindTexture(GL_TEXTURE_2D, *texture);
+  glTexImage2D(
+      GL_TEXTURE_2D, 0, GL_RGB,
+      width, height, 0, GL_RGB,
+      GL_UNSIGNED_BYTE, image
+      );
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  SOIL_free_image_data(image);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 int main()
 {
   /*
@@ -110,19 +134,10 @@ int main()
   GLuint VAO;
   createVertexArray(&VAO);
 
-  GLuint texture;
-  int imageWidth, imageHeight;
-  unsigned char *image = SOIL_load_image(
-      "./container.jpg", &imageWidth, &imageHeight,
-      0, SOIL_LOAD_RGB
-      );
-  glGenTextures(1, &texture);
+  GLuint texture1, texture2;
+  loadTexture("./container.jpg", GL_TEXTURE0, &texture1);
+  loadTexture("./awesomeface.png", GL_TEXTURE1, &texture2);
 
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  SOIL_free_image_data(image);
-  glBindTexture(GL_TEXTURE_2D, 0);
 
   /*
    * Main loop
@@ -135,10 +150,17 @@ int main()
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader.use();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glUniform1i(glGetUniformLocation(shader.program, "theTexture1"), 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    glUniform1i(glGetUniformLocation(shader.program, "theTexture2"), 1);
+
     glBindVertexArray(VAO);
-    glBindTexture(GL_TEXTURE_2D, texture);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
 
     glfwSwapBuffers(window);
