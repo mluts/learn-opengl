@@ -14,7 +14,8 @@ void Shader::readVertex(const GLchar *path)
 {
 std::ifstream file;
 std::stringstream strstream;
-const GLchar *source;
+std::string src;
+GLchar *source;
 
   file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
@@ -30,7 +31,8 @@ const GLchar *source;
     return;
   }
 
-  source = strstream.str().c_str();
+  src = strstream.str();
+  source = (GLchar *)src.c_str();
 
   vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &source, NULL);
@@ -42,7 +44,8 @@ void Shader::readFragment(const GLchar *path)
 {
 std::ifstream file;
 std::stringstream strstream;
-const GLchar *source;
+std::string src;
+GLchar *source;
 
   file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
@@ -58,7 +61,8 @@ const GLchar *source;
     return;
   }
 
-  source = strstream.str().c_str();
+  src = strstream.str();
+  source = (GLchar *)src.c_str();
   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &source, NULL);
   glCompileShader(fragmentShader);
