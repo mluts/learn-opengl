@@ -4,25 +4,19 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "shader.hpp"
 #include "../soil/src/SOIL.h"
 
 GLfloat vertices[] = {
-   1.0f,  1.0f, 0.0f, // X Y Zc
-   1.0f, 0.0f, 0.0f, // RGB
-   1.0f, (1 - 1.0f), // Texture X Y
-
-   1.0f, -1.0f, 0.0f,
-   0.0f, 1.0f, 0.0f,
-   1.0f, (1 - 0.0f),
-
-  -1.0f, -1.0f, 0.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, (1 - 0.0f),
-
-  -1.0f,  1.0f, 0.0f,
-  1.0f, 1.0f, 0.0f,
-  0.0f, (1 - 1.0f)
+   // Vertices        // Colors         // Tex Coords
+   0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+   0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+  -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+  -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f
 };
 
 GLuint indices[] = {
@@ -30,12 +24,60 @@ GLuint indices[] = {
   3, 0, 2
 };
 
+GLfloat velocity = 50.0f,
+        newVelocity = 50.0f,
+        acceleration = 30.0f,
+        angle = 0.0f;
+
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
-  if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-  {
-    glfwSetWindowShouldClose(window, GL_TRUE);
+  if(action != GLFW_PRESS)
+    return;
+
+  switch(key) {
+    case GLFW_KEY_ESCAPE:
+      glfwSetWindowShouldClose(window, GL_TRUE);
+      break;
+    case GLFW_KEY_UP:
+      newVelocity += 30.0;
+      break;
+    case GLFW_KEY_DOWN:
+      newVelocity -= 30.0;
+      break;
+    case GLFW_KEY_ENTER:
+      newVelocity = 0;
+      break;
   }
+}
+
+void syncVelocity(GLfloat t1, GLfloat t2)
+{
+  GLfloat diff = newVelocity - velocity,
+          minus = diff < 0 ? -1 : 1;
+
+  if(abs(diff) == 0)
+    return;
+
+  if(abs(diff) < 0.01) {
+    velocity = newVelocity;
+  } else if(abs(diff) < acceleration) {
+    velocity += diff / 5.0;
+  } else {
+    velocity += (t2 - t1) * acceleration * minus;
+  }
+}
+
+GLfloat nextangle()
+{
+  static GLfloat t1 = 0, t2 = 0;
+  if(t2 == 0)
+    t2 = glfwGetTime();
+  t1 = t2;
+  t2 = glfwGetTime();
+
+  syncVelocity(t1, t2);
+  angle += (t2 - t1) * velocity;
+  return angle;
 }
 
 /*
@@ -148,6 +190,7 @@ int main()
   loadTexture("./container.jpg", GL_TEXTURE0, &texture1);
   loadTexture("./awesomeface.png", GL_TEXTURE1, &texture2);
 
+  glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
 
   /*
    * Main loop
@@ -161,18 +204,44 @@ int main()
 
     shader.use();
 
+    glm::mat4 trans;
+    trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+    trans = glm::rotate(
+        trans,
+        glm::radians(nextangle()),
+        glm::vec3(0.0, 0.0, 1.0)
+        );
+
+    glUniformMatrix4fv(
+        glGetUniformLocation(shader.program, "transform"),
+        1, GL_FALSE, glm::value_ptr(trans)
+        );
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glUniform1i(glGetUniformLocation(shader.program, "theTexture1"), 0);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glUniform1i(glGetUniformLocation(shader.program, "theTexture2"), 1);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    trans = glm::mat4();
+    trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+    trans = glm::rotate(
+        trans,
+        glm::radians(nextangle()),
+        glm::vec3(0.0, 0.0, 1.0)
+        );
+
+    glUniformMatrix4fv(
+        glGetUniformLocation(shader.program, "transform"),
+        1, GL_FALSE, glm::value_ptr(trans)
+        );
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
     glBindVertexArray(0);
 
     glfwSwapBuffers(window);
