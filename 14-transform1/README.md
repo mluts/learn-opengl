@@ -1,2 +1,2 @@
 ## C++
-Moving triangle periodically
+Transforming the texture
