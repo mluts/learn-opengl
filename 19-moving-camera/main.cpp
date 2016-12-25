@@ -71,8 +71,17 @@ glm::vec3 cubePositions[] = {
 glm::vec3 cameraPos{.0f, .0f, 3.0f};
 glm::vec3 cameraFront{.0f, .0f, -1.0f};
 glm::vec3 cameraUp{.0f, 1.0f, .0f};
-GLfloat cameraSpeed{.05f};
+GLfloat cameraSpeed{5.0f};
 bool keys[1024];
+
+GLfloat currentFrame{0},
+        lastFrame{0};
+
+void recordFrameTime()
+{
+  lastFrame = currentFrame;
+  currentFrame = glfwGetTime();
+}
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
@@ -89,18 +98,19 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 void doMovement()
 {
+  GLfloat delta = currentFrame - lastFrame;
   if(keys[GLFW_KEY_W])
-    cameraPos += cameraSpeed * cameraFront;
+    cameraPos += delta * cameraSpeed * cameraFront;
   if(keys[GLFW_KEY_S])
-    cameraPos -= cameraSpeed * cameraFront;
+    cameraPos -= delta * cameraSpeed * cameraFront;
   if(keys[GLFW_KEY_A])
-    cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * delta;
   if(keys[GLFW_KEY_D])
-    cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * delta;
   if(keys[GLFW_KEY_UP])
-    cameraPos += cameraSpeed * cameraUp;
+    cameraPos += cameraSpeed * cameraUp * delta;
   if(keys[GLFW_KEY_DOWN])
-    cameraPos -= cameraSpeed * cameraUp;
+    cameraPos -= cameraSpeed * cameraUp * delta;
 }
 
 /*
@@ -213,6 +223,7 @@ int main()
    */
   while(!glfwWindowShouldClose(window))
   {
+    recordFrameTime();
     glfwPollEvents();
     doMovement();
 
